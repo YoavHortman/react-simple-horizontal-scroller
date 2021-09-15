@@ -53,7 +53,7 @@ const Template: Story<TemplateProps> = (args: Partial<TemplateProps>) => {
 
 export const Default = Template.bind({});
 Default.args = {
-  initialItems: [0, 1, 2]
+  initialItems: [0, 1, 2, 3, 4]
 };
 
 export const WithPreselected = Template.bind({});

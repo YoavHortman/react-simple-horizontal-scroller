@@ -12,21 +12,51 @@ interface MovementControlsWithDirection extends MovementControls {
 interface MovementControls {
   containerClassName?: string;
   iconClassName?: string;
+  
+  /**
+   * Defaults to AUTO
+   * AUTO: only display when needed according to isScroll
+   * ALWAYS: Always on
+   * NONE: do not show (This is useful for touch screens where one might not need the controls)
+   */
   visibility?: 'AUTO' | 'ALWAYS' | 'NONE';
 
   /**
    * Attaches itself to the unreachable part of a movement controller depending on position
+   * SEPERATED: <-(HERE) {children} (HERE)->
+   * BEFORE_CHILD: <-(HERE) (HERE)-> {children}
+   * AFTER_CHILD: {children} <-(HERE) (HERE)->
+   * 
+   * This is useful for adding buttons before the arrows in case it's needed
    */
   innerElement?: any;
 }
 
 export interface ControlsConfig {
+  /**
+   * Defaults to: SEPERATED
+   * Will display according to this
+   * SEPERATED: <- {children} ->
+   * BEFORE_CHILD: <- -> {children}
+   * AFTER_CHILD: {children} <- ->
+   */
   position?: 'BEFORE_CHILD' | 'AFTER_CHILD' | 'SEPARATED';
+
+  /**
+   * Right scroll button behaviour
+   */
   right?: MovementControls;
+  
+  /**
+   * Left scroll button behaviour
+   */
   left?: MovementControls;
 }
 
 export interface HorizontalScrollContainerProps {
+  /**
+   * Configure controls position, looks and behaviour
+   */
   controlsConfig?: ControlsConfig;
   /**
    *  Internal listener is good for when only the window can resize.
@@ -34,7 +64,15 @@ export interface HorizontalScrollContainerProps {
    *  This is not meant to be changed while the component is alive
    */
   useExternalResizeListener?: boolean;
+
+  /**
+   * Will prevent conversion of mousewheel vertical scroll to horizontal
+   */
   removeMouseWheelOverride?: boolean;
+
+  /**
+   * Id of a <HorizontalScrollItem> that is selected
+   */
   selectedItemId?: string;
 
   /**
@@ -42,7 +80,14 @@ export interface HorizontalScrollContainerProps {
    */
   onScrollStateChange?: (isScrollable: boolean) => void;
 
+  /**
+   * Gets called at set intervals AFTER a scroll has ended
+   */
   onScrollEnd?: (reachedEnd: 'LEFT' | 'RIGHT' | null) => void;
+
+  /**
+   * Gets called whenever a scorll starts
+   */
   onScrollStart?: () => void;
 
   /**
@@ -207,13 +252,17 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
 
     const element = this.scrollableContainer.current;
     assertIsDefined(element)
-    let reachedEnd: 'RIGHT' | 'LEFT' | null = null;
+
+    this.props.onScrollEnd(this.getPositionAfterScrollEnd(element));
+  }
+
+  private getPositionAfterScrollEnd(element: HTMLDivElement): 'RIGHT' | 'LEFT' | null {
     if (!this.canScrollToSide(element, 'LEFT')) {
-      reachedEnd = 'LEFT';
+      return 'LEFT';
     } else if (!this.canScrollToSide(element, 'RIGHT')) {
-      reachedEnd = 'RIGHT';
+      return 'RIGHT';
     }
-    this.props.onScrollEnd(reachedEnd);
+    return null
   }
 
   private scrollStart() {
@@ -235,7 +284,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     const iconClassName = config.iconClassName !== undefined ? config.iconClassName : config.direction === 'LEFT' ? 'HorizontalScrollContainer_defaultLeftArrow' : 'HorizontalScrollContainer_defaultRightArrow';
     return <div
       onClick={() => this.scrollStep(config.direction)}
-      className={'HorizontalScrollContainer_defaultArrowContainer' + ' ' + config.containerClassName ?? ''}
+      className={'HorizontalScrollContainer_defaultArrowContainer ' + config.containerClassName ?? ''}
     >
       <div className={iconClassName} />
     </div>;

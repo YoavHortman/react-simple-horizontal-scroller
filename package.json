@@ -7,12 +7,15 @@
   "types": "lib/index.d.ts",
   "files": [
     "/lib"
- ],
+  ],
+  "homepage": "http://yoavhortman.github.io/react-horizontal-scroller",
   "scripts": {
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "build": "rollup -c",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "predeploy": "npm run build-storybook",
+    "deploy-storybook": "npm run predeploy && gh-pages -d storybook-static"
   },
   "np": {
     "publish": false,
@@ -35,6 +38,7 @@
     "@storybook/react": "^6.1.9",
     "@types/react": "^17.0.0",
     "babel-loader": "^8.2.2",
+    "gh-pages": "^3.2.3",
     "postcss": "^8.2.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

@@ -2,5 +2,5 @@
 
 
 ## Init
-npm i
-npm run storybook
+* npm i
+* npm run storybook

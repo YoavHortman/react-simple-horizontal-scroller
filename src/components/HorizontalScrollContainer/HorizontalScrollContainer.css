@@ -1,0 +1,107 @@
+.HorizontalScrollContainer_root {
+  display: flex;
+  display: -webkit-flex;
+  overflow-x: auto;
+  flex-grow: 1;
+  -webkit-flex-grow: 1;
+  /* Hide scrollbar Internet Explorer 10+ */
+  -ms-overflow-style: none;
+  /* Hide scrollbar Firefox */
+  scrollbar-width: none
+}
+
+.HorizontalScrollContainer_buttonsContainer {
+  display: flex;
+  display: -webkit-flex;
+  align-items: center;
+  -webkit-align-items: center;
+}
+
+.HorizontalScrollContainer_buttonsContainerShaking {
+  z-index: 1
+}
+
+.HorizontalScrollContainer_itemsContainer {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  display: -webkit-flex;
+  flex-basis: auto;
+  -webkit-flex-basis: auto;
+  overflow-x: scroll;
+  -webkit-overflow-scrolling: touch;
+  /* Hide scrollbar Internet Explorer 10+ */
+  -ms-overflow-style: none;
+  /* Hide scrollbar Firefox */
+  scrollbar-width: none
+}
+
+/* Hide scrollbar Safari and Chrome */
+
+.HorizontalScrollContainer_itemsContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar Safari and Chrome */
+
+.HorizontalScrollContainer_root::-webkit-scrollbar {
+  display: none;
+}
+
+.HorizontalScrollContainer_tabsContainerIESupportWhenScrolling {
+  flex-basis: 0;
+  -webkit-flex-basis: 0;
+  flex-grow: 1;
+  -webkit-flex-grow: 1;
+}
+
+.HorizontalScrollContainer_shakeRight {
+  animation-name: HorizontalScrollContainer_shakeRight;
+  animation-duration: 0.3s;
+}
+
+.HorizontalScrollContainer_shakeLeft {
+  animation-name: HorizontalScrollContainer_shakeLeft;
+  animation-duration: 0.3s;
+}
+
+.HorizontalScrollContainer_defaultArrowContainer {
+  min-width: 12px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+.HorizontalScrollContainer_defaultRightArrow {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+  transform: rotate(-45deg);
+}
+
+.HorizontalScrollContainer_defaultLeftArrow {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+  transform: rotate(135deg);
+}
+
+@keyframes HorizontalScrollContainer_shakeRight {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  33% {
+    transform: translateX(-32px);
+  }
+}
+
+@keyframes HorizontalScrollContainer_shakeLeft {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  33% {
+    transform: translateX(32px);
+  }
+}

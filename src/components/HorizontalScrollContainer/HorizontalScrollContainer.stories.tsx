@@ -48,7 +48,8 @@ const Template: Story<TemplateProps> = (args: Partial<TemplateProps>) => {
           </HorizontalScrollItem>
         })}
       </HorizontalScrollContainer>
-    </div></div>
+    </div>
+  </div>
 };
 
 export const Default = Template.bind({});
@@ -63,7 +64,45 @@ WithPreselected.args = {
 };
 
 
-// export const WithDifferent = Template.bind({});
-// WithPreselected.args = {
-//   props: { selectedItemId: '8' },
-// };
+const Template2: Story<TemplateProps> = (args) => {
+  const [selected, setSelected] = React.useState(args.props?.selectedItemId)
+  const [items, setItems] = React.useState(args.initialItems ?? [])
+  const [isLoading, setIsLoading] = React.useState(false)
+
+  return <div style={{ display: 'flex', overflow: 'hidden', width: 500, border: '1px solid red', padding: 4 }}>
+    <HorizontalScrollContainer
+      {...args.props}
+      controlsConfig={{
+        right: {
+          innerElement: isLoading ? <div>loading..</div> : undefined
+        }
+      }}
+      selectedItemId={selected}
+      onScrollEnd={(end) => {
+        console.log(end)
+        if (end === 'RIGHT' && !isLoading) {
+          setIsLoading(true)
+          setTimeout(() => {
+            setIsLoading(false)
+            setItems(items.concat([items.length, items.length + 1, items.length + 2, items.length + 3]))
+          }, 3000)
+        }
+      }}>
+      {items.map((item) => {
+        return <HorizontalScrollItem
+          id={"" + item}
+          style={{ flexShrink: 0, width: 100, height: 30, border: '1px solid black', background: selected === "" + item ? 'green' : undefined }}
+          onClick={() => setSelected("" + item)}
+        >
+          {item}
+        </HorizontalScrollItem>
+      })}
+    </HorizontalScrollContainer>
+  </div>
+}
+
+
+export const InfiniteScroll = Template2.bind({});
+InfiniteScroll.args = {
+  initialItems: [0, 1, 2, 3, 4, 5],
+};

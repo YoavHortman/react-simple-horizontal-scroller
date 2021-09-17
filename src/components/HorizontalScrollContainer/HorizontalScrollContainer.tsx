@@ -12,7 +12,7 @@ interface MovementControlsWithDirection extends MovementControls {
 interface MovementControls {
   containerClassName?: string;
   iconClassName?: string;
-  
+
   /**
    * Defaults to AUTO
    * AUTO: only display when needed according to isScroll
@@ -46,7 +46,7 @@ export interface ControlsConfig {
    * Right scroll button behaviour
    */
   right?: MovementControls;
-  
+
   /**
    * Left scroll button behaviour
    */
@@ -76,7 +76,8 @@ export interface HorizontalScrollContainerProps {
   selectedItemId?: string;
 
   /**
-   * Always fires onMount
+   * Always fires onMount.
+   * Returns if the container is overflowing.
    */
   onScrollStateChange?: (isScrollable: boolean) => void;
 
@@ -142,12 +143,11 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
   }
 
   public render() {
-    const isSeprate = this.props.controlsConfig?.position === undefined || this.props.controlsConfig.position === 'SEPARATED';
-    const beforeChild = isSeprate || this.props.controlsConfig?.position === 'BEFORE_CHILD';
-    const afterChild = isSeprate || this.props.controlsConfig?.position === 'AFTER_CHILD';
+    const isSeperate = this.props.controlsConfig?.position === undefined || this.props.controlsConfig.position === 'SEPARATED';
+    const beforeChild = isSeperate || this.props.controlsConfig?.position === 'BEFORE_CHILD';
+    const afterChild = isSeperate || this.props.controlsConfig?.position === 'AFTER_CHILD';
     return <div
       onWheel={this.handleWheel}
-      onScroll={this.handleScroll}
       className={'HorizontalScrollContainer_root'}
     >
       {this.state.isScrollable && beforeChild ? this.renderControls('BEFORE_CHILD') : null}
@@ -155,6 +155,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
         className={this.getChildrenContainerClass()}
         ref={this.scrollableContainer}
         onAnimationEnd={() => this.setState({ shaking: null })}
+        onScroll={this.handleScroll}
       >
         {!this.state.isScrollable && beforeChild ? this.renderControls('BEFORE_CHILD') : null}
         {this.renderChildren()}
@@ -172,7 +173,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     let movementControls: React.ReactNode | null = null;
     const right: MovementControlsWithDirection = { ...this.props.controlsConfig?.right, direction: 'RIGHT' };
     const left: MovementControlsWithDirection = { ...this.props.controlsConfig?.left, direction: 'LEFT' };
-    const positioning = this.props.controlsConfig?.position ?? 'SEPARATED' 
+    const positioning = this.props.controlsConfig?.position ?? 'SEPARATED'
     switch (positioning) {
       case 'BEFORE_CHILD':
         if (position === 'BEFORE_CHILD') {
@@ -198,12 +199,12 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
         if (position === 'BEFORE_CHILD') {
           movementControls = <>
             {this.isMovementControlsVisible(left) ? this.renderMovementControl(left) : null}
-            {right.innerElement}
+            {left.innerElement}
           </>;
         }
         if (position === 'AFTER_CHILD') {
           movementControls = <>
-            {left.innerElement}
+            {right.innerElement}
             {this.isMovementControlsVisible(right) ? this.renderMovementControl(right) : null}
           </>;
         }

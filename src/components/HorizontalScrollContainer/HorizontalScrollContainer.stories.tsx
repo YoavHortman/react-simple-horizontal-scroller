@@ -74,6 +74,7 @@ const Template2: Story<TemplateProps> = (args) => {
       {...args.props}
       controlsConfig={{
         right: {
+          visibility: isLoading ? "NONE" : 'AUTO',
           innerElement: isLoading ? <div>loading..</div> : undefined
         }
       }}

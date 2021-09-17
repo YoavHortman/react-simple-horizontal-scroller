@@ -97,6 +97,12 @@ export interface HorizontalScrollContainerProps {
    * (scrollAbleElementWidth) => Math.max(window.getWidth() / 2, scrollAbleElementWidth / 10);
    */
   customScrollBy?: (scrollAbleElementWidth: number) => number;
+
+  /**
+   * How to position children in the container if it is not yet scrollable.
+   * defaults to: 'start'
+   */
+  childPosition?: 'start' | 'end' | 'center' | 'space-between' | 'space-around' | 'space-evenely';
 }
 
 export interface HorizontalScrollContainerState {
@@ -156,6 +162,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
         ref={this.scrollableContainer}
         onAnimationEnd={() => this.setState({ shaking: null })}
         onScroll={this.handleScroll}
+        style={{justifyContent: !this.state.isScrollable ? this.props.childPosition : undefined}}
       >
         {!this.state.isScrollable && beforeChild ? this.renderControls('BEFORE_CHILD') : null}
         {this.renderChildren()}

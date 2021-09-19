@@ -1,6 +1,6 @@
 {
   "name": "react-simple-horizontal-scroller",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "A wrapper for horizontally scorlling items, like tabs, that will manage adding and removing scroll controls",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -9,6 +9,10 @@
     "/lib"
   ],
   "homepage": "http://yoavhortman.github.io/react-simple-horizontal-scroller",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YoavHortman/react-simple-horizontal-scroller"
+  },
   "scripts": {
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",

@@ -26,8 +26,9 @@ const itemStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  borderRight: '2px solid white',
-  color: 'white'
+  margin: '0 4px',
+  color: 'white',
+  boxSizing: 'border-box'
 }
 
 const parentStyle: React.CSSProperties = {
@@ -69,7 +70,7 @@ const Template: Story<TemplateProps> = (args: Partial<TemplateProps>) => {
         {items.map((item) => {
           return <HorizontalScrollItem
             id={"" + item}
-            style={{ ...itemStyle, background: selected === "" + item ? 'green' : colors[item % colors.length] }}
+            style={{ ...itemStyle, background: colors[item % colors.length], border: selected === "" + item ? '2px solid blue' : undefined }}
             onClick={() => setSelected("" + item)}
           >
             {item}
@@ -119,7 +120,7 @@ const Template2: Story<TemplateProps> = (args) => {
       {items.map((item) => {
         return <HorizontalScrollItem
           id={"" + item}
-          style={{ ...itemStyle, background: selected === "" + item ? 'green' : colors[item % colors.length] }}
+          style={{ ...itemStyle, background: colors[item % colors.length], border: selected === "" + item ? '2px solid blue' : undefined  }}
           onClick={() => setSelected("" + item)}
         >
           {item}

@@ -7,29 +7,21 @@ interface MovementControlsWithDirection extends MovementControls {
   direction: 'LEFT' | 'RIGHT';
 }
 
-// TODO find a way to provide a container that's controlled by the visiblity,
-// TODO and a way to merge the movement control in to it
 interface MovementControls {
-  containerClassName?: string;
-  iconClassName?: string;
+  /** 
+   * To override the default arrow movement control, 
+   * provide a component that calls scrollStep() onClick.
+   * The defeaultArrow is provided for convience and can be rendered without calling scrollStep.
+   */
+  customComponent?: (scrollStep: () => void, defaultArrow: React.ReactChild) => React.ReactChild | undefined | null
 
   /**
-   * Defaults to AUTO
+   * Defaults to AUTO.
    * AUTO: only display when needed according to isScroll
    * ALWAYS: Always on
    * NONE: do not show (This is useful for touch screens where one might not need the controls)
    */
   visibility?: 'AUTO' | 'ALWAYS' | 'NONE';
-
-  /**
-   * Attaches itself to the unreachable part of a movement controller depending on position
-   * SEPERATED: <-(HERE) {children} (HERE)->
-   * BEFORE_CHILD: <-(HERE) (HERE)-> {children}
-   * AFTER_CHILD: {children} <-(HERE) (HERE)->
-   * 
-   * This is useful for adding buttons before the arrows in case it's needed
-   */
-  innerElement?: any;
 }
 
 export interface ControlsConfig {
@@ -103,6 +95,13 @@ export interface HorizontalScrollContainerProps {
    * defaults to: 'start'
    */
   childPosition?: 'start' | 'end' | 'center' | 'space-between' | 'space-around' | 'space-evenely';
+
+  /**
+   * Add a debounce to the resize listener.
+   * This is helpful when window resizing is already a heavy opertaion.
+   * Should be left undefined in most cases.
+   */
+  resizeListenerDebounce?: number;
 }
 
 export interface HorizontalScrollContainerState {
@@ -137,7 +136,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     if (this.props.useExternalResizeListener !== true) {
       window.addEventListener('resize', this.resize);
     }
-    this.resize();
+    this.resizeWithDebounce(50);
   }
 
   public componentWillUnmount(): void {
@@ -162,7 +161,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
         ref={this.scrollableContainer}
         onAnimationEnd={() => this.setState({ shaking: null })}
         onScroll={this.handleScroll}
-        style={{justifyContent: !this.state.isScrollable ? this.props.childPosition : undefined}}
+        style={{ justifyContent: !this.state.isScrollable ? this.props.childPosition : undefined }}
       >
         {!this.state.isScrollable && beforeChild ? this.renderControls('BEFORE_CHILD') : null}
         {this.renderChildren()}
@@ -172,52 +171,47 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     </div>;
   }
 
+  public getMovementControls(position: 'BEFORE_CHILD' | 'AFTER_CHILD') {
+    const right: MovementControlsWithDirection = { ...this.props.controlsConfig?.right, direction: 'RIGHT' };
+    const left: MovementControlsWithDirection = { ...this.props.controlsConfig?.left, direction: 'LEFT' };
+    const controlsConfigPosition = this.props.controlsConfig?.position ?? 'SEPARATED'
+    switch (controlsConfigPosition) {
+      case 'AFTER_CHILD': {
+        if (position === 'AFTER_CHILD') {
+          return <>
+            {this.isMovementControlsVisible(left) ? this.renderMovementControl(left) : null}
+            {this.isMovementControlsVisible(right) ? this.renderMovementControl(right) : null}
+          </>;
+        }
+        break;
+      }
+      case 'BEFORE_CHILD': {
+        if (position === 'BEFORE_CHILD') {
+          return <>
+            {this.isMovementControlsVisible(left) ? this.renderMovementControl(left) : null}
+            {this.isMovementControlsVisible(right) ? this.renderMovementControl(right) : null}
+          </>;
+        }
+        break;
+      }
+      case 'SEPARATED': {
+        if (position === 'BEFORE_CHILD') {
+          return this.isMovementControlsVisible(left) ? this.renderMovementControl(left) : null;
+        }
+        if (position === 'AFTER_CHILD') {
+          return this.isMovementControlsVisible(right) ? this.renderMovementControl(right) : null;
+        }
+        break;
+      }
+      default:
+        assertNever(controlsConfigPosition);
+    }
+
+  }
+
   public renderControls(position: 'BEFORE_CHILD' | 'AFTER_CHILD') {
     if (!this.isControlVisible()) {
       return null;
-    }
-
-    let movementControls: React.ReactNode | null = null;
-    const right: MovementControlsWithDirection = { ...this.props.controlsConfig?.right, direction: 'RIGHT' };
-    const left: MovementControlsWithDirection = { ...this.props.controlsConfig?.left, direction: 'LEFT' };
-    const positioning = this.props.controlsConfig?.position ?? 'SEPARATED'
-    switch (positioning) {
-      case 'BEFORE_CHILD':
-        if (position === 'BEFORE_CHILD') {
-          movementControls = <>
-            {this.isMovementControlsVisible(left) ? this.renderMovementControl(left) : null}
-            {left.innerElement}
-            {this.isMovementControlsVisible(right) ? this.renderMovementControl(right) : null}
-            {right.innerElement}
-          </>;
-        }
-        break;
-      case 'AFTER_CHILD':
-        if (position === 'AFTER_CHILD') {
-          movementControls = <>
-            {left.innerElement}
-            {this.isMovementControlsVisible(left) ? this.renderMovementControl(left) : null}
-            {right.innerElement}
-            {this.isMovementControlsVisible(right) ? this.renderMovementControl(right) : null}
-          </>;
-        }
-        break;
-      case 'SEPARATED':
-        if (position === 'BEFORE_CHILD') {
-          movementControls = <>
-            {this.isMovementControlsVisible(left) ? this.renderMovementControl(left) : null}
-            {left.innerElement}
-          </>;
-        }
-        if (position === 'AFTER_CHILD') {
-          movementControls = <>
-            {right.innerElement}
-            {this.isMovementControlsVisible(right) ? this.renderMovementControl(right) : null}
-          </>;
-        }
-        break;
-      default:
-        assertNever(positioning);
     }
 
     return <div
@@ -226,7 +220,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
         (this.state.shaking !== null ? ' HorizontalScrollContainer_buttonsContainerShaking' : '')
       }
     >
-      {movementControls}
+      {this.getMovementControls(position)}
     </div>;
   }
 
@@ -238,7 +232,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     }
   }
 
-  private handleWheel = (e: any) => {
+  private handleWheel = (e: React.WheelEvent) => {
     if (e.deltaY === 0 || e.deltaX !== 0 || this.props.removeMouseWheelOverride === true) {
       return;
     }
@@ -289,13 +283,20 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
   }
 
   private renderMovementControl(config: MovementControlsWithDirection) {
-    const iconClassName = config.iconClassName !== undefined ? config.iconClassName : config.direction === 'LEFT' ? 'HorizontalScrollContainer_defaultLeftArrow' : 'HorizontalScrollContainer_defaultRightArrow';
-    return <div
-      onClick={() => this.scrollStep(config.direction)}
-      className={'HorizontalScrollContainer_defaultArrowContainer ' + config.containerClassName ?? ''}
+    const iconClassName = config.direction === 'LEFT' ? 'HorizontalScrollContainer_defaultLeftArrow' : 'HorizontalScrollContainer_defaultRightArrow';
+    const scrollStepWithDirectiton = () => this.scrollStep(config.direction);
+
+    const defaultIcon = <div
+      onClick={scrollStepWithDirectiton}
+      className={'HorizontalScrollContainer_defaultArrowContainer'}
     >
       <div className={iconClassName} />
     </div>;
+
+    if (config.customComponent !== undefined) {
+      return config.customComponent(scrollStepWithDirectiton, defaultIcon)
+    }
+    return defaultIcon;
   }
 
   private renderChildren(): React.ReactNode {
@@ -321,29 +322,36 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
   }
 
   private isControlVisible(): boolean {
-    const right = this.props.controlsConfig?.right;
-    const left = this.props.controlsConfig?.left;
-    return left === undefined || right === undefined ||
-      this.isMovementControlsVisible(right) ||
-      this.isMovementControlsVisible(left) ||
-      left.innerElement || right.innerElement;
+    return this.isMovementControlsVisible(this.props.controlsConfig?.right) ||
+      this.isMovementControlsVisible(this.props.controlsConfig?.left);
   }
 
   private isMovementControlsVisible(config: MovementControls | undefined): boolean {
-    return config === undefined ||
-      config.visibility === 'ALWAYS' ||
-      (this.state.isScrollable && config.visibility !== 'NONE');
+    if (config === undefined) {
+      return this.state.isScrollable;
+    } else {
+      return config.visibility === 'ALWAYS' || (this.state.isScrollable && config.visibility !== 'NONE');
+    }
   }
 
   private resize = (): void => {
+    if (this.props.resizeListenerDebounce === undefined) {
+      this.resizeListener()
+    } else {
+      this.resizeWithDebounce(this.props.resizeListenerDebounce)
+    }
+  }
+
+  private resizeWithDebounce(debounce: number) {
     clearTimeout(this.resizeTimeoutId);
-    this.resizeTimeoutId = window.setTimeout(this.resizeListener, 50);
+      this.resizeTimeoutId = window.setTimeout(this.resizeListener, debounce);
   }
 
   private resizeListener = (): void => {
     const element = this.scrollableContainer.current;
     if (element === null) {
-      return;
+      setImmediate(this.resizeListener);
+      return
     }
 
     // Do not use element.clientWidth because it gets ROUNDED which causes false positives
@@ -390,7 +398,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     }
   }
 
-  private getScrollBy(element: any, direction: 'LEFT' | 'RIGHT'): number {
+  private getScrollBy(element: HTMLDivElement, direction: 'LEFT' | 'RIGHT'): number {
     const sideModifier = direction === 'LEFT' ? -1 : 1;
     if (this.props.customScrollBy !== undefined) {
       return sideModifier * this.props.customScrollBy(element.clientWidth);

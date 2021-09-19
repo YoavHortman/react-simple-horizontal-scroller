@@ -1,9 +1,7 @@
 .HorizontalScrollContainer_root {
   display: flex;
-  display: -webkit-flex;
   overflow-x: auto;
   flex-grow: 1;
-  -webkit-flex-grow: 1;
   /* Hide scrollbar Internet Explorer 10+ */
   -ms-overflow-style: none;
   /* Hide scrollbar Firefox */
@@ -12,23 +10,19 @@
 
 .HorizontalScrollContainer_buttonsContainer {
   display: flex;
-  display: -webkit-flex;
   align-items: center;
-  -webkit-align-items: center;
 }
 
 .HorizontalScrollContainer_buttonsContainerShaking {
-  z-index: 1
+  z-index: 1;
 }
 
 .HorizontalScrollContainer_itemsContainer {
   width: 100%;
   box-sizing: border-box;
   display: flex;
-  display: -webkit-flex;
   flex-basis: auto;
-  -webkit-flex-basis: auto;
-  overflow-x: scroll;
+  overflow-x: scroll; 
   -webkit-overflow-scrolling: touch;
   /* Hide scrollbar Internet Explorer 10+ */
   -ms-overflow-style: none;

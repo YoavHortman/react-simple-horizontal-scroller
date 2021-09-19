@@ -6,6 +6,38 @@ import { HorizontalScrollItem } from "../..";
 import { HorizontalScrollContainerProps } from "./HorizontalScrollContainer";
 
 
+const colors = [
+  '#ff00d8',
+  '#ff00ab',
+  '#ff007b',
+  '#ff3b4c',
+  '#ff6f0d',
+  '#ff9700',
+  '#f0b800',
+  '#c4d300',
+  '#8ce900',
+  '#00fc55',
+]
+
+const itemStyle: React.CSSProperties = {
+  flexShrink: 0,
+  width: 100,
+  height: 30,
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderRight: '2px solid white',
+  color: 'white'
+}
+
+const parentStyle: React.CSSProperties = {
+  display: 'flex',
+  overflow: 'hidden',
+  border: '1px solid black',
+  padding: 4
+}
+
+
 const meta: Meta = {
   title: "Components/HorziontalScrollContainer",
   component: HorizontalScrollContainer
@@ -15,14 +47,10 @@ type TemplateProps = { initialItems: number[], props: HorizontalScrollContainerP
 
 export default meta;
 
-
-// Create a master template for mapping args to render the Button component
 const Template: Story<TemplateProps> = (args: Partial<TemplateProps>) => {
   const [containerWidth, setContainerWidth] = React.useState(400);
   const [selected, setSelected] = React.useState(args.props?.selectedItemId)
   const [items, setItems] = React.useState(args.initialItems ?? [])
-
-
 
   return <div style={{ width: '100%', display: "flex", flexDirection: 'column', alignItems: "center" }}>
 
@@ -36,12 +64,12 @@ const Template: Story<TemplateProps> = (args: Partial<TemplateProps>) => {
       <button onClick={() => setItems(items.slice(0, -1))}>- Item</button>
     </div>
 
-    <div style={{ display: 'flex', overflow: 'hidden', width: containerWidth, border: '1px solid red', padding: 4 }}>
+    <div style={{ ...parentStyle, width: containerWidth }}>
       <HorizontalScrollContainer {...args.props} selectedItemId={selected}>
         {items.map((item) => {
           return <HorizontalScrollItem
             id={"" + item}
-            style={{ flexShrink: 0, width: 100, height: 30, border: '1px solid black', background: selected === "" + item ? 'green' : undefined }}
+            style={{ ...itemStyle, background: selected === "" + item ? 'green' : colors[item % colors.length] }}
             onClick={() => setSelected("" + item)}
           >
             {item}
@@ -69,13 +97,12 @@ const Template2: Story<TemplateProps> = (args) => {
   const [items, setItems] = React.useState(args.initialItems ?? [])
   const [isLoading, setIsLoading] = React.useState(false)
 
-  return <div style={{ display: 'flex', overflow: 'hidden', width: 500, border: '1px solid red', padding: 4 }}>
+  return <div style={{ ...parentStyle, width: 500 }}>
     <HorizontalScrollContainer
       {...args.props}
       controlsConfig={{
         right: {
-          visibility: isLoading ? "NONE" : 'AUTO',
-          innerElement: isLoading ? <div>loading..</div> : undefined
+          customComponent: isLoading ? (scrollStep) => <div>loading..</div> : undefined
         }
       }}
       selectedItemId={selected}
@@ -92,7 +119,7 @@ const Template2: Story<TemplateProps> = (args) => {
       {items.map((item) => {
         return <HorizontalScrollItem
           id={"" + item}
-          style={{ flexShrink: 0, width: 100, height: 30, border: '1px solid black', background: selected === "" + item ? 'green' : undefined }}
+          style={{ ...itemStyle, background: selected === "" + item ? 'green' : colors[item % colors.length] }}
           onClick={() => setSelected("" + item)}
         >
           {item}
@@ -107,3 +134,68 @@ export const InfiniteScroll = Template2.bind({});
 InfiniteScroll.args = {
   initialItems: [0, 1, 2, 3, 4, 5],
 };
+
+
+const Template3: Story<TemplateProps> = (args: Partial<TemplateProps>) => {
+  const [items, setItems] = React.useState(args.initialItems ?? [])
+  const [scrollState, setScrollState] = React.useState(false);
+
+  return <div style={{ width: '100%', display: "flex", flexDirection: 'column', alignItems: "center" }}>
+
+    <div style={{ ...parentStyle, width: 800 }}>
+      <HorizontalScrollContainer
+        {...args.props}
+        onScrollStateChange={setScrollState}
+        controlsConfig={{
+          right: {
+            customComponent: (scrollStep, defaultIcon) => <><AddItem items={items} onClick={setItems} />{defaultIcon}</>
+          },
+          left: {
+            customComponent: (scrollStep, defaultIcon) => <>{defaultIcon}<RemoveItem items={items} onClick={setItems} /></>
+          }
+        }}
+      >
+
+        {!scrollState && <RemoveItem items={items} onClick={setItems} />}
+        {items.map((item) => {
+          return <div
+            style={{ ...itemStyle, background: colors[item % colors.length] }}
+          >
+            {item}
+          </div>
+        })}
+        {!scrollState && <AddItem items={items} onClick={setItems} />}
+      </HorizontalScrollContainer>
+    </div>
+  </div>
+};
+
+
+export const TrailingButton = Template3.bind({});
+TrailingButton.args = {
+  initialItems: [0, 1, 2],
+};
+
+
+interface ItemButtonProps {
+  items: number[];
+  onClick: (newItems: number[]) => void;
+}
+
+const AddItem: React.FC<ItemButtonProps> = (props) => {
+  return <button
+    style={{ height: '100%', marginLeft: 8, marginRight: 8, width: 64 }}
+    onClick={() => props.onClick(props.items.concat(props.items.length))}
+  >
+    + Item
+  </button>;
+}
+
+const RemoveItem: React.FC<ItemButtonProps> = (props) => {
+  return <button
+    style={{ height: '100%', marginLeft: 8, marginRight: 8, width: 64 }}
+    onClick={() => props.onClick(props.items.slice(0, -1))}
+  >
+    - Item
+  </button>
+}

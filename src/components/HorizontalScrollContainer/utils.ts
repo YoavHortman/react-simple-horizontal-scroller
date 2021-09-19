@@ -22,36 +22,6 @@ export function isElementOfType<P = {}>(
   );
 }
 
-/**
- * @param element Current target
- * @param id Id of sibling
- */
-export function nextElementSiblingWithId(element: Element, id: string): Element | null {
-  const nextSibling = element.nextElementSibling;
-  if (nextSibling === null) {
-    return null;
-  }
-  if (nextSibling.id === id) {
-    return nextSibling;
-  }
-  return nextElementSiblingWithId(nextSibling, id);
-}
-
-/**
- * @param element Current target
- * @param id Id of sibling
- */
-export function previousElementSiblingWithId(element: Element, id: string): Element | null {
-  const nextSibling = element.previousElementSibling;
-  if (nextSibling === null) {
-    return null;
-  }
-  if (nextSibling.id === id) {
-    return nextSibling;
-  }
-  return previousElementSiblingWithId(nextSibling, id);
-}
-
 export function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
   assert(val !== undefined && val !== null, `Expected 'val' to be defined, but received ${val}`);
 }

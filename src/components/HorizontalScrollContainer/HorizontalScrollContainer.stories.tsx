@@ -70,7 +70,7 @@ const Template: Story<TemplateProps> = (args: Partial<TemplateProps>) => {
         {items.map((item) => {
           return <HorizontalScrollItem
             id={"" + item}
-            style={{ ...itemStyle, background: colors[item % colors.length], border: selected === "" + item ? '2px solid blue' : undefined }}
+            style={{ ...itemStyle, background: colors[item % colors.length], border: selected === "" + item ? '3px solid blue' : undefined }}
             onClick={() => setSelected("" + item)}
           >
             {item}
@@ -120,7 +120,7 @@ const Template2: Story<TemplateProps> = (args) => {
       {items.map((item) => {
         return <HorizontalScrollItem
           id={"" + item}
-          style={{ ...itemStyle, background: colors[item % colors.length], border: selected === "" + item ? '2px solid blue' : undefined  }}
+          style={{ ...itemStyle, background: colors[item % colors.length], border: selected === "" + item ? '3px solid blue' : undefined  }}
           onClick={() => setSelected("" + item)}
         >
           {item}

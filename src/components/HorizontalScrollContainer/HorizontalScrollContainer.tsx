@@ -8,6 +8,20 @@ interface MovementControlsWithDirection extends MovementControls {
 }
 
 interface MovementControls {
+
+  /**
+   * Set the default icon class and style, gets preseverd when defaultArrow is sent to customCompoent.
+   * To change icon color set ```borderColor```
+   */
+  defaultIconClassName?: string;
+  defaultIconStyle?: React.CSSProperties;
+
+  /**
+   * Set default container class and style, gets preseverd when defaultArrow is sent to customCompoent.
+   */
+  defaultIconContainerClassName?: string;
+  defaultIconContainerStyle?: React.CSSProperties;
+
   /** 
    * To override the default arrow movement control, 
    * provide a component that calls scrollStep() onClick.
@@ -288,9 +302,13 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
 
     const defaultIcon = <div
       onClick={scrollStepWithDirectiton}
-      className={'HorizontalScrollContainer_defaultArrowContainer'}
+      className={'HorizontalScrollContainer_defaultArrowContainer ' + config.defaultIconContainerClassName ?? ''}
+      style={config.defaultIconContainerStyle}
     >
-      <div className={iconClassName} />
+      <div
+        className={iconClassName + ' ' + config.defaultIconClassName ?? ''}
+        style={config.defaultIconStyle}
+      />
     </div>;
 
     if (config.customComponent !== undefined) {
@@ -344,7 +362,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
 
   private resizeWithDebounce(debounce: number) {
     clearTimeout(this.resizeTimeoutId);
-      this.resizeTimeoutId = window.setTimeout(this.resizeListener, debounce);
+    this.resizeTimeoutId = window.setTimeout(this.resizeListener, debounce);
   }
 
   private resizeListener = (): void => {

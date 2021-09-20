@@ -60,7 +60,8 @@
 }
 
 .HorizontalScrollContainer_defaultArrowContainer {
-  min-width: 12px;
+  min-width: 32px;
+  height: 100%;
   align-items: center;
   justify-content: center;
   display: flex;

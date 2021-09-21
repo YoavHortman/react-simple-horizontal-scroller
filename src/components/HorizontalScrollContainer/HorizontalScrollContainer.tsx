@@ -153,6 +153,9 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     assertIsDefined(this.scrollableContainer.current);
     this.scrollableContainer.current.addEventListener('wheel', this.handleWheel, { passive: false });
 
+    /**
+     * Must happen this way to scroll the selected element into view
+     */
     this.resizeWithDebounce(0);
   }
 
@@ -171,7 +174,6 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     const beforeChild = isSeperate || this.props.controlsConfig?.position === 'BEFORE_CHILD';
     const afterChild = isSeperate || this.props.controlsConfig?.position === 'AFTER_CHILD';
     return <div
-      onWheel={this.handleWheel}
       className={'HorizontalScrollContainer_root'}
     >
       {this.state.isScrollable && beforeChild ? this.renderControls('BEFORE_CHILD') : null}

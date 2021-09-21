@@ -150,10 +150,15 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     if (this.props.useExternalResizeListener !== true) {
       window.addEventListener('resize', this.resize);
     }
-    this.resizeWithDebounce(50);
+    assertIsDefined(this.scrollableContainer.current);
+    this.scrollableContainer.current.addEventListener('wheel', this.handleWheel, { passive: false });
+
+    this.resizeWithDebounce(0);
   }
 
   public componentWillUnmount(): void {
+    assertIsDefined(this.scrollableContainer.current);
+    this.scrollableContainer.current.removeEventListener('wheel', this.handleWheel)
     window.removeEventListener('resize', this.resize);
   }
 
@@ -239,14 +244,15 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
   }
 
   private scrollIntoViewIfNeeded() {
-    if (this.selectedItem.current !== null && this.lastSelectedItemId !== this.props.selectedItemId) {
+    const selected = this.selectedItem.current;
+    if (selected !== null && this.lastSelectedItemId !== this.props.selectedItemId) {
       this.lastSelectedItemId = this.props.selectedItemId;
       this.scrollTimeoutTimer = this.SCROLL_TIMEOUT_INTO_VIEW;
-      this.selectedItem.current.scrollIntoView({ behavior: 'smooth' });
+      selected.scrollIntoView({ behavior: 'smooth' });
     }
   }
 
-  private handleWheel = (e: React.WheelEvent) => {
+  private handleWheel = (e: any) => {
     if (e.deltaY === 0 || e.deltaX !== 0 || this.props.removeMouseWheelOverride === true) {
       return;
     }
@@ -258,6 +264,8 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
       this.scrollTimeoutTimer = this.SCROLL_TIMEOUT_WHEEL;
       element.scrollBy({ top: 0, left: e.deltaY });
     }
+    e.preventDefault();
+    e.stopPropagation();
   }
 
   private handleScrollEnd = () => {
@@ -354,9 +362,9 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
 
   private resize = (): void => {
     if (this.props.resizeListenerDebounce === undefined) {
-      this.resizeListener()
+      this.resizeListener();
     } else {
-      this.resizeWithDebounce(this.props.resizeListenerDebounce)
+      this.resizeWithDebounce(this.props.resizeListenerDebounce);
     }
   }
 
@@ -367,10 +375,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
 
   private resizeListener = (): void => {
     const element = this.scrollableContainer.current;
-    if (element === null) {
-      setImmediate(this.resizeListener);
-      return
-    }
+    assertIsDefined(element);
 
     // Do not use element.clientWidth because it gets ROUNDED which causes false positives
     // https://stackoverflow.com/questions/21064101/understanding-offsetwidth-clientwidth-scrollwidth-and-height-respectively

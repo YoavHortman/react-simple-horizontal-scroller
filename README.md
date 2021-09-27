@@ -2,6 +2,7 @@
 A 0 dependency, simple and lightweight wrapper, to manage horizontal scrolling and all of its caveats in a user friendly way.
 
 ### [Demo link](https://yoavhortman.github.io/react-simple-horizontal-scroller/)
+![horizontalScrollDemo](https://user-images.githubusercontent.com/21311864/134921000-04850fe7-cae5-4b3d-8ebd-d3e0dfb4a230.gif)
 
 # Get started
 ```$ npm i react-simple-horizontal-scroller```
@@ -72,6 +73,9 @@ A ```<HorizontalScrollItem>``` may be placed anywhere inside a ```<HorizontalScr
 ## To work on the project
 * npm i
 * npm run storybook
+
+## Issues
+Feel free to submit issues / PRs.
 
 ### TODOS
 * Improve demos

@@ -22,15 +22,6 @@ export function isElementOfType<P = {}>(
   );
 }
 
-export function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
-  assert(val !== undefined && val !== null, `Expected 'val' to be defined, but received ${val}`);
-}
-
-export function assert(condition: any, msg?: string): asserts condition {
-  if (!condition) {
-    throw new AssertionError({ message: msg });
-  }
-}
 export function assertNever(val: never) {
   return val;
 }

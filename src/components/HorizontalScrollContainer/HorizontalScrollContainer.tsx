@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './HorizontalScrollContainer.css';
 import { HorizontalScrollItem } from './HorizontalScrollItem';
-import { assertIsDefined, assertNever, isElementOfType } from './utils';
+import { assertNever, isElementOfType } from './utils';
 
 interface MovementControlsWithDirection extends MovementControls {
   direction: 'LEFT' | 'RIGHT';
@@ -150,8 +150,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     if (this.props.useExternalResizeListener !== true) {
       window.addEventListener('resize', this.resize);
     }
-    assertIsDefined(this.scrollableContainer.current);
-    this.scrollableContainer.current.addEventListener('wheel', this.handleWheel, { passive: false });
+    this.scrollableContainer.current?.addEventListener('wheel', this.handleWheel, { passive: false });
 
     /**
      * Must happen this way to scroll the selected element into view
@@ -160,8 +159,7 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
   }
 
   public componentWillUnmount(): void {
-    assertIsDefined(this.scrollableContainer.current);
-    this.scrollableContainer.current.removeEventListener('wheel', this.handleWheel)
+    this.scrollableContainer.current?.removeEventListener('wheel', this.handleWheel)
     window.removeEventListener('resize', this.resize);
   }
 
@@ -260,11 +258,10 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     }
 
     const element = this.scrollableContainer.current;
-    assertIsDefined(element)
     const direction = e.deltaY > 0 ? 'RIGHT' : 'LEFT';
     if (this.canScrollToSide(element, direction)) {
       this.scrollTimeoutTimer = this.SCROLL_TIMEOUT_WHEEL;
-      element.scrollBy({ top: 0, left: e.deltaY });
+      element?.scrollBy({ top: 0, left: e.deltaY });
     }
     e.preventDefault();
     e.stopPropagation();
@@ -277,12 +274,10 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     }
 
     const element = this.scrollableContainer.current;
-    assertIsDefined(element)
-
     this.props.onScrollEnd(this.getPositionAfterScrollEnd(element));
   }
 
-  private getPositionAfterScrollEnd(element: HTMLDivElement): 'RIGHT' | 'LEFT' | null {
+  private getPositionAfterScrollEnd(element: HTMLDivElement | null): 'RIGHT' | 'LEFT' | null {
     if (!this.canScrollToSide(element, 'LEFT')) {
       return 'LEFT';
     } else if (!this.canScrollToSide(element, 'RIGHT')) {
@@ -377,8 +372,9 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
 
   private resizeListener = (): void => {
     const element = this.scrollableContainer.current;
-    assertIsDefined(element);
-
+    if (element === null) {
+      return;
+    }
     // Do not use element.clientWidth because it gets ROUNDED which causes false positives
     // https://stackoverflow.com/questions/21064101/understanding-offsetwidth-clientwidth-scrollwidth-and-height-respectively
     // https://developer.mozilla.org/en-US/docs/Web/API/Element/clientWidth
@@ -414,7 +410,10 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
     return classList;
   }
 
-  private canScrollToSide(element: HTMLDivElement, direction: 'LEFT' | 'RIGHT'): boolean {
+  private canScrollToSide(element: HTMLDivElement | null, direction: 'LEFT' | 'RIGHT'): boolean {
+    if (element === null) {
+      return false;
+    }
     if (direction === 'LEFT') {
       return element.scrollLeft > 0;
     } else {
@@ -436,12 +435,11 @@ export class HorizontalScrollContainer extends React.Component<HorizontalScrollC
 
   private scrollStep(direction: 'LEFT' | 'RIGHT'): void {
     const element = this.scrollableContainer.current;
-    assertIsDefined(element)
     if (!this.state.isScrollable || !this.canScrollToSide(element, direction) && this.state.shaking === null) {
       this.setState({ shaking: direction });
     } else if (!this.isScrolling) {
       this.scrollTimeoutTimer = this.SCROLL_TIMEOUT_ARROWS;
-      element.scrollBy({
+      element?.scrollBy({
         top: 0,
         left: this.getScrollBy(element, direction),
         behavior: 'smooth',
